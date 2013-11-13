@@ -1,69 +1,106 @@
-task main()
-{
-bMotorReflected[port8] = true;
-bMotorReflected[port9] = true;
-bMotorReflected[port10] = true;
-bMotorReflected[port4] = true;
-bMotorReflected[port7] = true;
-while(1 == 1)
-{
-
-motor[port2] = vexRT[Ch4] + vexRT[Ch1] - vexRT[Ch3];
-motor[port3] = vexRT[Ch4] - vexRT[Ch1] + vexRT[Ch3];
-motor[port9] = vexRT[Ch4] + vexRT[Ch1] + vexRT[Ch3];
-motor[port8] = vexRT[Ch4] - vexRT[Ch1] - vexRT[Ch3];
-
-
-//Arm up and Down\/
-if(vexRT[btn5U] == 1)
-{
-	motor[port1] = -127;
-	motor[port10] = -127;
+#pragma platform(VEX)
+ 
+//Competition Control and Duration Settings
+#pragma competitionControl(Competition)
+#pragma autonomousDuration(15)
+#pragma userControlDuration(105)
+ 
+#include "Vex_Competition_Includes.c"   //Main competition background code...do not modify!
+ 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//                          Pre-Autonomous Functions
+//
+// You may want to perform some actions before the competition starts. Do them in the
+// following function.
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+void pre_auton() {
+	// Set bStopTasksBetweenModes to false if you want to keep user created tasks running between
+	// Autonomous and Tele-Op modes. You will need to manage all user created tasks if set to false.
+	bStopTasksBetweenModes = true;
+ 
+	// All activities that occur before the competition starts
+	// Example: clearing encoders, setting servo positions, ...
 }
-else if(vexRT[btn5D] == 1)
-{
-	motor[port1] = 127;
-	motor[port10] = 127;
+ 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//                                 Autonomous Task
+//
+// This task is used to control your robot during the autonomous phase of a VEX Competition.
+// You must modify the code to add your own robot specific commands here.
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+task autonomous() {
+	//
+	// Add code for the autonomous period here
+	//
+	
+	AutonomousCodePlaceholderForTesting();
 }
-else
-{
-	motor[port1] = 0;
-	motor[port10] = 0;
-}
-//Extention Code \/
-if(vexRT[btn6U] == 1)
-{
-	motor[port4] = 127;
-	motor[port7] = 127;
-}
-else if(vexRT[btn6D] == 1)
-{
-	motor[port4] = -127;
-	motor[port7] = -127;
-}
-else
-{
-	motor[port4] = 0;
-	motor[port7] = 0;
-}
-
-//Ball Collection Code \/
-if(vexRT[btn8U] == 1)
-{
-	motor[port5] = 127;
-	motor[port6] = 127;
-}
-else if(vexRT[btn8U] == 1)
-{
-	motor[port5] = -127;
-	motor[port6] = -127;
-}
-else
-{
-	motor[port5] = 0;
-	motor[port6] = 0;
-}
-
-}
-
+ 
+/////////////////////////////////////////////////////////////////////////////////////////
+//
+//                                 User Control Task
+//
+// This task is used to control your robot during the user control phase of a VEX Competition.
+// You must modify the code to add your own robot specific commands here.
+//
+/////////////////////////////////////////////////////////////////////////////////////////
+task usercontrol() {
+	bMotorReflected[port8] = true;
+	bMotorReflected[port9] = true;
+	bMotorReflected[port10] = true;
+	bMotorReflected[port4] = true;
+	bMotorReflected[port7] = true;		
+ 
+	while (true) {
+		// This is the main execution loop for the user control program. Each time through the loop
+		// your program should update motor + servo values based on feedback from the joysticks.
+ 
+ 		// Drive
+		motor[port2] = vexRT[Ch4] + vexRT[Ch1] - vexRT[Ch3];
+		motor[port3] = vexRT[Ch4] - vexRT[Ch1] + vexRT[Ch3];
+		motor[port9] = vexRT[Ch4] + vexRT[Ch1] + vexRT[Ch3];
+		motor[port8] = vexRT[Ch4] - vexRT[Ch1] - vexRT[Ch3];
+		
+		// Arm Up and Down
+		if (vexRT[Btn5U]) {
+			motor[port1] = -127;
+			motor[port10] = -127;
+		} else if (vexRT[Btn5D]) {
+			motor[port1] = 127;
+			motor[port10] = 127;
+		} else {
+			motor[port1] = 0;
+			motor[port10] = 0;
+		}
+		
+		// Arm Extension
+		if (vexRT[Btn6U]) {
+			motor[port4] = 127;
+			motor[port7] = 127;
+		} else if (vexRT[Btn6D]) {
+			motor[port4] = -127;
+			motor[port7] = -127;
+		} else {
+			motor[port4] = 0; 
+			motor[port7] = 0;
+		}
+		
+		// Ball Manipulator
+		if (vexRT[Btn8U]) {
+			motor[port5] = 127;
+			motor[port6] = 127;
+		} else if (vexRT[Btn8D]) {
+			motor[port5] = -127;
+			motor[port6] = -127;
+		} else {
+			motor[port5] = 0;
+			motor[port6] = 0;
+		}
+		
+		wait1Msec(20);
+	}
 }
