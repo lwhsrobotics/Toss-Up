@@ -15,7 +15,7 @@ PidState liftStateRight;
 int LIFT_DT = 15;
 
 const int LIFT_MIN = 0;
-const int LIFT_MAX = 0;
+const int LIFT_MAX = 33 / 12 * 627; // (teeth on rack) / (teeth per pinion) * (encoder ticks per revolution)
 
 float Kp = 0.05;
 float Ki = 0.01;
