@@ -1,12 +1,12 @@
 #pragma platform(VEX)
- 
+
 //Competition Control and Duration Settings
 #pragma competitionControl(Competition)
 #pragma autonomousDuration(15)
 #pragma userControlDuration(105)
- 
+
 #include "Vex_Competition_Includes.c"   //Main competition background code...do not modify!
- 
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //                          Pre-Autonomous Functions
@@ -19,11 +19,11 @@ void pre_auton() {
 	// Set bStopTasksBetweenModes to false if you want to keep user created tasks running between
 	// Autonomous and Tele-Op modes. You will need to manage all user created tasks if set to false.
 	bStopTasksBetweenModes = true;
- 
+
 	// All activities that occur before the competition starts
 	// Example: clearing encoders, setting servo positions, ...
 }
- 
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //                                 Autonomous Task
@@ -33,13 +33,66 @@ void pre_auton() {
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 task autonomous() {
-	//
-	// Add code for the autonomous period here
-	//
-	
-	AutonomousCodePlaceholderForTesting();
+	//go forward
+	motor[port2] = 63;
+	motor[port3] = 63;
+	motor[port8] = 63;
+	motor[port9] = 63;
+	wait1Msec(1000);
+	motor[port2] = 0;
+	motor[port3] = 0;
+	motor[port8] = 0;
+	motor[port9] = 0;
+	wait1Msec(2);
+	//up
+	motor[port1] = -127;
+	motor[port10] = -127;
+	wait1Msec(1000);
+	//forward
+	motor[port2] = 63;
+	motor[port3] = 63;
+	motor[port8] = 63;
+	motor[port9] = 63;
+	wait1Msec(2000);
+	motor[port2] = 0;
+	motor[port3] = 0;
+	motor[port8] = 0;
+	motor[port9] = 0;
+	wait1Msec(2);
+	//lift down
+	motor[port1] = 127;
+	motor[port10] = 127;
+	wait1Msec(900);
+	motor[port1] = 0;
+	motor[port10] = 0;
+	wait1Msec(2);
+
+	motor[port2] = -63;
+	motor[port3] = -63;
+	motor[port8] = -63;
+	motor[port9] = -63;
+	wait1Msec(2000);
+	motor[port2] = 63;
+	motor[port3] = 63;
+	motor[port8] = 63;
+	motor[port9] = 63;
+	wait1Msec(3000);
+	motor[port2] = 0;
+	motor[port3] = 0;
+	motor[port8] = 0;
+	motor[port9] = 0;
+	wait1Msec(2);
+	//let ball out
+	motor[port5] = 127;
+	motor[port5] = 127;
+	wait1Msec(600);
+	motor[port5] = 0;
+	motor[port5] = 0;
+	wait1Msec(2);
+
+
 }
- 
+
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //                                 User Control Task
@@ -53,18 +106,18 @@ task usercontrol() {
 	bMotorReflected[port9] = true;
 	bMotorReflected[port10] = true;
 	bMotorReflected[port4] = true;
-	bMotorReflected[port7] = true;		
- 
+	bMotorReflected[port7] = true;
+
 	while (true) {
 		// This is the main execution loop for the user control program. Each time through the loop
 		// your program should update motor + servo values based on feedback from the joysticks.
- 
+
  		// Drive
 		motor[port2] = vexRT[Ch4] + vexRT[Ch1] - vexRT[Ch3];
 		motor[port3] = vexRT[Ch4] - vexRT[Ch1] + vexRT[Ch3];
 		motor[port9] = vexRT[Ch4] + vexRT[Ch1] + vexRT[Ch3];
 		motor[port8] = vexRT[Ch4] - vexRT[Ch1] - vexRT[Ch3];
-		
+
 		// Arm Up and Down
 		if (vexRT[Btn5U]) {
 			motor[port1] = -127;
@@ -76,7 +129,7 @@ task usercontrol() {
 			motor[port1] = 0;
 			motor[port10] = 0;
 		}
-		
+
 		// Arm Extension
 		if (vexRT[Btn6U]) {
 			motor[port4] = 127;
@@ -85,10 +138,10 @@ task usercontrol() {
 			motor[port4] = -127;
 			motor[port7] = -127;
 		} else {
-			motor[port4] = 0; 
+			motor[port4] = 0;
 			motor[port7] = 0;
 		}
-		
+
 		// Ball Manipulator
 		if (vexRT[Btn8U]) {
 			motor[port5] = 127;
@@ -100,7 +153,7 @@ task usercontrol() {
 			motor[port5] = 0;
 			motor[port6] = 0;
 		}
-		
+
 		wait1Msec(20);
 	}
 }
