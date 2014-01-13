@@ -33,66 +33,8 @@ void pre_auton() {
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 task autonomous() {
-	//go forward
-	motor[port2] = 63;
-	motor[port3] = 63;
-	motor[port8] = 63;
-	motor[port9] = 63;
-	wait1Msec(1000);
-	motor[port2] = 0;
-	motor[port3] = 0;
-	motor[port8] = 0;
-	motor[port9] = 0;
-	wait1Msec(2);
-	//up
-	motor[port1] = -127;
-	motor[port10] = -127;
-	wait1Msec(1000);
-	//forward
-	motor[port2] = 63;
-	motor[port3] = 63;
-	motor[port8] = 63;
-	motor[port9] = 63;
-	wait1Msec(2000);
-	motor[port2] = 0;
-	motor[port3] = 0;
-	motor[port8] = 0;
-	motor[port9] = 0;
-	wait1Msec(2);
-	//lift down
-	motor[port1] = 127;
-	motor[port10] = 127;
-	wait1Msec(900);
-	motor[port1] = 0;
-	motor[port10] = 0;
-	wait1Msec(2);
-
-	motor[port2] = -63;
-	motor[port3] = -63;
-	motor[port8] = -63;
-	motor[port9] = -63;
-	wait1Msec(2000);
-	motor[port2] = 63;
-	motor[port3] = 63;
-	motor[port8] = 63;
-	motor[port9] = 63;
-	wait1Msec(3000);
-	motor[port2] = 0;
-	motor[port3] = 0;
-	motor[port8] = 0;
-	motor[port9] = 0;
-	wait1Msec(2);
-	//let ball out
-	motor[port5] = 127;
-	motor[port5] = 127;
-	wait1Msec(600);
-	motor[port5] = 0;
-	motor[port5] = 0;
-	wait1Msec(2);
-
 
 }
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //
 //                                 User Control Task
@@ -104,13 +46,13 @@ task autonomous() {
 task usercontrol() {
 	bMotorReflected[port8] = true;
 	bMotorReflected[port9] = true;
-	bMotorReflected[port10] = true;
-	bMotorReflected[port4] = true;
-	bMotorReflected[port7] = true;
+	bMotorReflected[port3] = true;
+	bMotorReflected[port5] = true;
 
 	while (true) {
 		// This is the main execution loop for the user control program. Each time through the loop
 		// your program should update motor + servo values based on feedback from the joysticks.
+
 
  		// Drive
 		motor[port2] = vexRT[Ch4] + vexRT[Ch1] - vexRT[Ch3];
@@ -120,17 +62,14 @@ task usercontrol() {
 
 		// Arm Up and Down
 		if (vexRT[Btn5U]) {
-			motor[port1] = -127;
-			motor[port10] = -127;
+			motor[port4] = -127;
 		} else if (vexRT[Btn5D]) {
-			motor[port1] = 127;
-			motor[port10] = 127;
+			motor[port4] = 127;
 		} else {
-			motor[port1] = 0;
-			motor[port10] = 0;
+			motor[port4] = 0;
 		}
 
-		// Arm Extension
+		// Hang Robot
 		if (vexRT[Btn6U]) {
 			motor[port4] = 127;
 			motor[port7] = 127;
@@ -143,10 +82,10 @@ task usercontrol() {
 		}
 
 		// Ball Manipulator
-		if (vexRT[Btn8U]) {
+		if (vexRT[Btn5U]) {
 			motor[port5] = 127;
 			motor[port6] = 127;
-		} else if (vexRT[Btn8D]) {
+		} else if (vexRT[Btn5D]) {
 			motor[port5] = -127;
 			motor[port6] = -127;
 		} else {
@@ -154,6 +93,17 @@ task usercontrol() {
 			motor[port6] = 0;
 		}
 
+		// Hang
+		if (vexRT[Btn8U]) {
+			motor[port7] = 127;
+			motor[port10] = 127;
+		} else if (vexRT[Btn8D]) {
+			motor[port7] = -127;
+			motor[port10] = -127;
+		} else {
+			motor[port7] = 0;
+			motor[port10] = 0;
+}
 		wait1Msec(20);
 	}
 }
