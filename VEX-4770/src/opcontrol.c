@@ -8,108 +8,80 @@
 #include "liftcontrol.h"
 #include <math.h>
 #include "motors.h"
+#include "lcd.h"
 
 int ramp(int x) {
 	return x * abs(x) / 127;
 }
 
-PidState liftStateLeft;
-PidState liftStateRight;
-
-const int LIFT_SPEED = 17;
-
-//const float LIFT_KP = 0.8;
-//const float LIFT_KI = 0.05;
-//const float LIFT_KD = 2.0;
+const int LIFT_SPEED = 60;
 
 void operatorControl() {
-	// Encoder Tick Counters
-	/*int driveBackLeftCount = 0;
-	int driveBackRightCount = 0;
-	int driveFrontLeftCount = 0;
-	int driveFrontRightCount = 0;*/
-	//int liftLeftCount = 0;
-	//int liftRightCount = 0;
+	lcdInit(uart1);
+	lcdClear(uart1);
+	lcdSetBacklight(uart1, true);
 
-	int dt = 20;
+	liftTaskCreate();
 
-	liftInit();
-
-	//pidInitState(&liftStateLeft, Kp, Ki, Kd, 150);
-	//pidInitState(&liftStateRight, Kp, Ki, Kd, 150);
-	//pidSetTarget(&liftStateLeft, liftLeftCount);
-	//pidSetTarget(&liftStateRight, liftRightCount);
-
+	pinMode(1, OUTPUT);
+	int imeLeft;
+	int imeRight;
 	while (true) {
-		//imeGet(liftBackLeft, &liftLeftCount);
-		//imeGet(liftBackRight, &liftRightCount);
+		imeGet(0, &imeLeft);
+		imeGet(1, &imeRight);
+		lcdPrint(uart1, 1, "IME Left %d", imeLeft);
+		lcdPrint(uart1, 2, "IME Right %d", imeRight);
 
-		// Drive
-		int leftX  = ramp(joystickGetAnalog(1, 3));
-		int leftY  = ramp(joystickGetAnalog(1, 4));
-		int rightX = ramp(joystickGetAnalog(1, 1));
-
-		motorSet(driveFrontRight, leftY + rightX - leftX);
-		motorSet(driveBackRight,  leftY - rightX + leftX);
-		motorSet(driveFrontLeft,  leftY + rightX + leftX);
-		motorSet(driveBackLeft,   leftY - rightX - leftX);
-
-		// Lift
-		int liftUp = joystickGetDigital(1, 6, JOY_UP);
-		int liftDown = joystickGetDigital(1, 6, JOY_DOWN);
-
-		if (liftUp) {
-			/*
-			motorSet(liftBackLeft, -127);
-			motorSet(liftFrontRight, -127);
-			motorSet(liftBackRight, 127);
-			motorSet(liftFrontLeft, 127);
-			*/
-			//pidIncrementTarget(&liftStateLeft, 15);
-			//pidIncrementTarget(&liftStateRight, 15);
-			liftManual(LIFT_SPEED);
-		} else if (liftDown) {
-			/*
-			motorSet(liftBackLeft, -127);
-			motorSet(liftFrontRight, -127);
-			motorSet(liftBackRight, 127);
-			motorSet(liftFrontLeft, 127);
-			*/
-			//pidIncrementTarget(&liftStateLeft, -15);
-			//pidIncrementTarget(&liftStateRight, -15);
-			liftManual(-LIFT_SPEED);
-		} else {
-			/*
-			motorSet(liftBackLeft, 0);
-			motorSet(liftFrontRight, 0);
-			motorSet(liftBackRight, 0);
-			motorSet(liftFrontLeft, 0);
-			*/
+		if (joystickGetDigital(1, 7, JOY_DOWN)) {
+			digitalWrite(1, 1);
+			digitalWrite(1, 0);
 		}
 
-		//int liftLeft = pid(&liftStateLeft, liftLeftCount, dt);
-		//int liftRight = pid(&liftStateRight, liftRightCount, dt);
+		// Drive
+		int leftY  = ramp(joystickGetAnalog(1, 3));
+		int rightY = ramp(joystickGetAnalog(1, 2));
+		motorSet(driveFrontRight,  -rightY);
+		motorSet(driveMiddleRight, -rightY);
+		motorSet(driveBackRight,   -rightY);
+		motorSet(driveFrontLeft,   leftY);
+		motorSet(driveMiddleLeft,  leftY);
+		motorSet(driveBackLeft,    leftY);
 
-		//motorSet(liftBackRight, liftRight);
-		//motorSet(liftFrontRight, -liftRight);
-		//motorSet(liftBackLeft, -liftLeft);
-		//motorSet(liftBackRight, liftLeft);
+		// Lift
+		int liftUp   = joystickGetDigital(1, 6, JOY_UP);
+		int liftDown = joystickGetDigital(1, 6, JOY_DOWN);
+
+		if (liftUp && liftDown) {
+			//motorSet(liftLeft, 40);
+			//motorSet(liftRight, -40);
+		} else if (liftUp) {
+			liftManual(LIFT_SPEED);
+			//motorSet(liftLeft, 127);
+			//motorSet(liftRight, -127);
+		} else if (liftDown) {
+			liftManual(-LIFT_SPEED);
+			//motorSet(liftLeft, -127);
+			//motorSet(liftRight, 127);
+		} else {
+			//motorSet(liftLeft, 0);
+			//motorSet(liftRight, 0);
+		}
 
 		// Manipulator
-		int manipulatorIn = joystickGetDigital(1, 5, JOY_UP);
-		int manipulatorOut = joystickGetDigital(1, 5, JOY_DOWN);
-
+		int manipulatorIn = joystickGetDigital(1, 5, JOY_DOWN);
+		int manipulatorOut = joystickGetDigital(1, 5, JOY_UP);
 		if (manipulatorIn) {
-			motorSet(intakeLeft, 127);
-			motorSet(intakeRight, -127);
-		} else if (manipulatorOut) {
 			motorSet(intakeLeft, -127);
 			motorSet(intakeRight, 127);
+		} else if (manipulatorOut) {
+			motorSet(intakeLeft, 60);
+			motorSet(intakeRight, -60);
 		} else {
 			motorSet(intakeLeft, 0);
 			motorSet(intakeRight, 0);
 		}
 
-		delay(dt);
+
+		delay(50);
 	}
 }

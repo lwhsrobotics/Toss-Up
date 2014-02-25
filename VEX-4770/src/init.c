@@ -6,6 +6,8 @@
 
 #include "main.h"
 #include "liftcontrol.h"
+#include "lcd.h"
+#include "drivecontrol.h"
 
 /*
  * Runs pre-initialization code.
@@ -35,7 +37,13 @@ void initializeIO() {
  * can be implemented in this task if desired.
  */
 void initialize() {
-	int imeCount = imeInitializeAll();
+	//taskCreate(lcdMenu, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
 
-	taskCreate(lift, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
+	// initialize integrated motor encoders
+	//int imeCount = imeInitializeAll();
+
+	// initialize lift control task
+	liftInit();
+
+	driveInit();
 }
