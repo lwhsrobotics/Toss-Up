@@ -23,8 +23,13 @@ int liftAcquireSemaphore(int timeout);
 int liftReleaseSemaphore();
 
 void liftInit();
+void liftReset();
 
 void liftSetTarget(int target);
+
+void liftSetMax();
+void liftSetHalf();
+void liftSetMin();
 
 void liftManual(int y);
 

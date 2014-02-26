@@ -25,8 +25,73 @@ void autonomous() {
 	delay(300);
 
 	// start PID, automatically puts lift down
+	liftReset();
 	liftTaskCreate();
 
+	// programming skills uber ownage
+	// drive towards goal and lift to scoring position
+	driveStraightWithoutSlowing(48, 127);
+	liftSetMax();
+	liftWaitTarget(150);
+	driveStraight(18, 127);
+
+	// score preload
+	intakeOut();
+	delay(500);
+	intakeOff();
+
+	// return to starting tile
+	driveStraight(-18, 127);
+	liftSetMin();
+	liftWaitTarget(150);
+	driveStraight(-48, 127);
+
+	// reposition
+	delay(1000);
+
+	// drive under big ball
+	driveStraight(50, 127);
+	liftSetMax();
+	driveTurn(-45, 127);
+	liftWaitTarget(250);
+	driveStraight(24, 127);
+
+	// score big ball
+	intakeOut();
+	delay(500);
+	intakeOff();
+
+	// return back under the barrier
+	driveStraight(-12, 127);
+	liftSetMin();
+	driveTurn(45, 127);
+	liftWaitTarget(250);
+	driveStraight(-35, 127);
+
+	intakeOut();
+
+	return;
+	// 20 points (bucky, large ball stashed, large ball goal)
+	driveStraight(60, 127);
+	liftSetMax();
+	driveTurn(-45, 80);
+	liftWaitTarget(250);
+	driveStraight(24, 100);
+
+	intakeOut();
+	delay(500);
+	driveStraight(-6, 127);
+	delay(250);
+	intakeOff();
+	driveStraight(-6, 127);
+	liftSetMin();
+	driveTurn(45, 80);
+	liftWaitTarget(150);
+	driveStraight(-60, 127);
+
+
+	return;
+	// run routine for 15 pts (bucky, 2 large balls scoring zone)
 	driveStraight(48, 127);
 	liftSetTarget(2350);
 

@@ -10,13 +10,14 @@
 
 Semaphore liftSemaphore;
 
-PidState liftStateLeft;
-PidState liftStateRight;
+PidState liftStateLeft, liftStateRight;
+int liftInitialTargetLeft, liftInitialTargetRight;
 
 int LIFT_DT = 15;
 
 const int LIFT_MIN = 800;//885;
 const int LIFT_MAX = 2350;//2175;
+const int LIFT_MID = 1600;
 
 float Kp = 0.2;
 float Ki = 0.1;
@@ -53,12 +54,17 @@ void liftTaskDelete() {
 }
 
 void liftInit() {
-	int liftLeftCount = analogRead(potLiftLeft), liftRightCount = analogRead(potLiftRight);
+	liftInitialTargetLeft = analogRead(potLiftLeft);
+	liftInitialTargetRight = analogRead(potLiftRight);
 
 	pidInitState(&liftStateLeft, Kp, Ki, Kd, 150);
 	pidInitState(&liftStateRight, Kp, Ki, Kd, 150);
-	pidSetTarget(&liftStateLeft, liftLeftCount);
-	pidSetTarget(&liftStateRight, liftRightCount);
+	liftReset();
+}
+
+void liftReset() {
+	pidSetTarget(&liftStateLeft, liftInitialTargetLeft);
+	pidSetTarget(&liftStateRight, liftInitialTargetRight);
 }
 
 void liftSetTarget(int target) {
@@ -70,6 +76,18 @@ void liftSetTarget(int target) {
 	}
 
 	LIFT_RELEASE
+}
+
+void liftSetMax() {
+	liftSetTarget(LIFT_MAX);
+}
+
+void liftSetMid() {
+	liftSetTarget(LIFT_MID);
+}
+
+void liftSetMin() {
+	liftSetTarget(LIFT_MIN);
 }
 
 void liftManual(int y) {

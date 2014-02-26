@@ -4,6 +4,7 @@
 
 #include "motors.h"
 #include "main.h"
+#include "pid.h"
 #include <math.h>
 #include <API.h>
 
@@ -21,15 +22,26 @@
  */
 const float TICKS_PER_INCH = 71.6197243913529;
 const float DRIVE_CIRCLE_CIRCUMFERENCE = 53.40707505;
-const float DRIVE_MAGIC_RATIO = 0.85;
+const float DRIVE_MAGIC_RATIO = 1.00;
 const float TURN_MAGIC_RATIO = 0.75;
+
+const int DRIVE_DT = 15;
+
+const float DRIVE_KP = 0.5;
+const float DRIVE_KI = 0.0;
+const float DRIVE_KD = 3.0;
 
 Encoder driveEncLeft;
 Encoder driveEncRight;
 
+PidState drivePidLeft;
+PidState drivePidRight;
+
 void driveInit() {
 	driveEncLeft = encoderInit(5, 6, false);
 	driveEncRight = encoderInit(3, 4, true);
+	pidInitState(&drivePidLeft, DRIVE_KP, DRIVE_KI, DRIVE_KD, 150);
+	pidInitState(&drivePidRight, DRIVE_KP, DRIVE_KI, DRIVE_KD, 150);
 }
 
 void driveMotors(int leftSpeed, int rightSpeed) {
@@ -117,38 +129,61 @@ void driveHelper(int distance, int speed, int scaleLeft, int scaleRight, bool ra
 
 	clearEncoders();
 
+	pidSetTarget(&drivePidLeft, target);
+	pidSetTarget(&drivePidRight, target);
+
 	int left = 0;
 	int right = 0;
 
-	while (true) {
-		left = abs(getLeftTicks());
-		right = abs(getRightTicks());
+	int timeSinceChange = 0;
 
-		int distanceTraveled = (left + right) / 2;
-		int distanceLeft = target - distanceTraveled;
-		if (distanceLeft < 0) break;
+	while (true) {
+		int newLeft = abs(getLeftTicks());
+		int newRight = abs(getRightTicks());
+
+		if (newLeft == left && newRight == right) {
+			timeSinceChange++;
+			if (timeSinceChange * DRIVE_DT > 500) break;
+		} else {
+			timeSinceChange = 0;
+		}
+
+		left = newLeft;
+		right = newRight;
 
 		// positive means left is further, negative means right is further
 		float camber = (left - right) * CAMBER_COEF;
 
-		int leftSpeed = scaleAutonomousDriveSpeed(clampMotorSpeed(speed - camber), distanceTraveled, distanceLeft);
-		int rightSpeed = scaleAutonomousDriveSpeed(clampMotorSpeed(speed + camber), distanceTraveled, distanceLeft);
+		int leftSpeed = pid(&drivePidLeft, left, DRIVE_DT) - camber;
+		int rightSpeed = pid(&drivePidRight, right, DRIVE_DT) + camber;
+
+		// scale start
+		leftSpeed *= scale(3, left) * 0.75 + 0.25;
+		rightSpeed *= scale(3, right) * 0.75 + 0.25;
+
+		/*int distanceTraveled = (left + right) / 2;
+		int distanceLeft = target - distanceTraveled;
+		if (distanceLeft < 0) break;*/
+		if (abs(drivePidLeft.lastError) < inchToTicks(1) && abs(drivePidRight.lastError) < inchToTicks(1)) break;
+
+		//int leftSpeed = scaleAutonomousDriveSpeed(clampMotorSpeed(speed - camber), distanceTraveled, distanceLeft);
+		//int rightSpeed = scaleAutonomousDriveSpeed(clampMotorSpeed(speed + camber), distanceTraveled, distanceLeft);
 		driveMotors(direction * scaleLeft * leftSpeed, direction * scaleRight * rightSpeed);
 
-		lcdPrint(uart1, 1, "Left  %d", leftSpeed);
-		lcdPrint(uart1, 2, "Right %d", rightSpeed);
+		//lcdPrint(uart1, 1, "Left  %d", leftSpeed);
+		//lcdPrint(uart1, 2, "Right %d", rightSpeed);
 
 		//lcdPrint(uart1, 1, "Distance %d", distanceTraveled);
 		//lcdPrint(uart1, 2, "Target %d", target);
 
-		taskDelay(50);
+		taskDelay(DRIVE_DT);
 	}
 
 	driveMotors(0, 0);
 	lcdClear(uart1);
 
 	// wait for the robot to stop moving
-	while (true) {
+	/*while (true) {
 		taskDelay(100);
 
 		int newLeft = abs(getLeftTicks());
@@ -158,7 +193,7 @@ void driveHelper(int distance, int speed, int scaleLeft, int scaleRight, bool ra
 
 		left = newLeft;
 		right = newRight;
-	}
+	}*/
 }
 
 void driveStraight(int distance, int speed) {

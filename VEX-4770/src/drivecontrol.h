@@ -10,6 +10,7 @@
 
 void driveMotors(int leftSpeed, int rightSpeed);
 void driveStraight(int distance, int speed);
+void driveStraightWithoutSlowing(int distance, int speed);
 void driveTurn(int degrees, int speed);
 void driveInit();
 
