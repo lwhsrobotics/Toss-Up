@@ -100,23 +100,23 @@ void autonomous() {
 	return;*/
 	// run routine for 15 pts (bucky, 2 large balls scoring zone)
 	driveStraight(48, 127);
-	liftSetTarget(2350);
+	liftSetMax();
 
-	driveStraight(12, 127);
+	//driveStraight(12, 127);
 	liftWaitTarget(150);
-	driveStraight(12, 127);
+	driveStraight(24, 127);
 	intakeOut();
 	delay(500);
 	intakeOff();
 
 	driveStraight(-12, 127);
-	liftSetTarget(800);
+	liftSetMin();
 	liftWaitTarget(500);
 	driveStraight(-60, 127);
 
 	delay(800);
 
-	liftSetTarget(1600);
+	liftSetHalf();
 	driveStraight(30, 127);
 
 	driveStraight(-30, 127);

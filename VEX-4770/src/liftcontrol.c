@@ -82,7 +82,7 @@ void liftSetMax() {
 	liftSetTarget(LIFT_MAX);
 }
 
-void liftSetMid() {
+void liftSetHalf() {
 	liftSetTarget(LIFT_MID);
 }
 
