@@ -31,4 +31,7 @@
 
 #define gyro 1
 
+#define hookPiston 1
+#define winchPiston 2
+
 #endif /* MOTORS_H_ */

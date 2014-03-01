@@ -7,6 +7,7 @@
 #include "liftcontrol.h"
 #include "pid.h"
 #include "motors.h"
+#include "drivecontrol.h"
 
 Semaphore liftSemaphore;
 
@@ -89,6 +90,7 @@ void liftSetHalf() {
 void liftSetMin() {
 	liftSetTarget(LIFT_MIN);
 }
+
 
 void liftManual(int y) {
 	int oldLeft = liftStateLeft.target;

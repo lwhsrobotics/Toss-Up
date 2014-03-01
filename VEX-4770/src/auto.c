@@ -10,6 +10,7 @@
 #include "lcd.h"
 #include "liftcontrol.h"
 #include "intakecontrol.h"
+#include "hang.h"
 
 void autonomous() {
 	lcdInit(uart1);

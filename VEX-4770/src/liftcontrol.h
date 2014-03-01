@@ -37,4 +37,6 @@ void liftIncrementTarget(int amount);
 
 void lift();
 
+void hang();
+
 #endif /* LIFTCONTROL_H_ */

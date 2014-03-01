@@ -8,6 +8,7 @@
 #include "liftcontrol.h"
 #include "lcd.h"
 #include "drivecontrol.h"
+#include "hang.h"
 
 /*
  * Runs pre-initialization code.
@@ -46,4 +47,6 @@ void initialize() {
 	liftInit();
 
 	driveInit();
+
+	hangInit();
 }

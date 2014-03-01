@@ -9,6 +9,7 @@
 #include <math.h>
 #include "motors.h"
 #include "lcd.h"
+#include "hang.h"
 
 int ramp(int x) {
 	return x * abs(x) / 127;
@@ -23,7 +24,8 @@ void operatorControl() {
 
 	liftTaskCreate();
 
-	pinMode(1, OUTPUT);
+	bool hookButtonPressed = false;
+
 	int imeLeft;
 	int imeRight;
 	while (true) {
@@ -32,10 +34,25 @@ void operatorControl() {
 		lcdPrint(uart1, 1, "IME Left %d", imeLeft);
 		lcdPrint(uart1, 2, "IME Right %d", imeRight);
 
-		if (joystickGetDigital(1, 7, JOY_DOWN)) {
-			digitalWrite(1, 1);
-			digitalWrite(1, 0);
+		// toggle hook
+		bool hookButtonPressedNow = joystickGetDigital(1, 7, JOY_UP);
+		if (hookButtonPressedNow && hookButtonPressedNow != hookButtonPressed) {
+			if (isHookDeployed()) {
+				retractHook();
+			} else {
+				deployHook();
+			}
 		}
+		hookButtonPressed = hookButtonPressedNow;
+
+		if (joystickGetDigital(1, 8, JOY_UP)) {
+			hang();
+		}
+
+		if (joystickGetDigital(1, 8, JOY_DOWN)) {
+			unhang();
+		}
+
 
 		// Drive
 		int leftY  = ramp(joystickGetAnalog(1, 3));
