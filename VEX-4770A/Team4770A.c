@@ -43,79 +43,7 @@ void pre_auton() {
 /////////////////////////////////////////////////////////////////////////////////////////
 task autonomous() {
 
-bMotorReflected[port1] = true;
-bMotorReflected[port10] = true;
-bMotorReflected[port8] = true;
-bMotorReflected[port7] = true;
-bMotorReflected[port6] = true;
 
-motor[port1] = -127;
-motor[port2] = 127;
-motor[port9] = -127;
-motor[port10] = 127;
-wait1Msec(500);
-motor[port4] = -127;
-motor[port7] = -127;
-wait1Msec(1000);
-motor[port4] = 0;
-motor[port7] = 0;
-
-
-/*
-motor[port1] = -127;
-motor[port2] = -127;
-motor[port9] = 127;
-motor[port10] = 127;
-
-
-/*
-//wait for drop down of collection!
-motor[port4] = -127;
-motor[port7] = -127;
-wait1Msec(1000);
-motor[port4] = 0;
-motor[port7] = 0;
-/*
-//go forward
-motor[port9] = 127;
-motor[port10] = 127;
-motor[port1] = 127;
-motor[port2] = 127;
-//Raise bar at same time
-motor[port4] = 63;
-motor[port7] = 63;
-wait1Msec(900);
-motor[port9] = 0;
-motor[port10] = 0;
-motor[port1] = 0;
-motor[port2] = 0;
-go back lowering bar
-go right or left
-go forward
-Raise bar at same time
-go back lowering the bar
-stop
-lower bar agenst ribber bands if needed
-go forward
-stop all
-
-//Insert other player ball hitting off
-
-stop and stop bar
-dispence small ball
-go left or right
-go back and raise bar
-go forward lowering bar
-go more left or right
-go back and raise bar
-go forward lowering bar
-
-
-
-
-
-
-*/
 }
 
 int RightPot;

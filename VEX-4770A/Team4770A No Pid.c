@@ -193,9 +193,6 @@ bMotorReflected[port3] = true;
 			motor[port8] = 0;
 		}
 
-
-
-
 		wait1Msec(20);
 	}
 }

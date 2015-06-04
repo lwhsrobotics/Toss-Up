@@ -56,7 +56,7 @@ void liftSetTarget(int target) {
 
 	LIFT_RELEASE
 }
-
+//0   1724   17
 void liftManual(int y) {
 	int oldLeft = liftStateLeft.target;
 	int oldRight = liftStateRight.target;
@@ -117,6 +117,3 @@ void lift() {
 		delay(LIFT_DT);
 	}
 }
-
-
-
