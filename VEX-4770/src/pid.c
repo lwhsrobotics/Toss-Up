@@ -3,6 +3,7 @@
  */
 
 #include <math.h>
+#include "main.h"
 
 #define ERROR_LOG_LEN 1
 
@@ -89,8 +90,11 @@ int pid(PidState* state, int pos, int dt) {
 	}
 
 	float derivative = (float) (error - previousErrorsAvg) / dt;
+	//printf("Error: %d    Integral: %d    Derivative: %d\r\n", error, (int) state->integral, (int)derivative);
 
-	int output = state->Kp * error + state->Ki * state->integral + state->Kd * derivative;
+	int output = (int) (state->Kp * error + state->Ki * state->integral + state->Kd * derivative);
+
+	//printf("Output: %d\r\n", output);
 
 	if (output > 127) output = 127;
 	if (output < -127) output = -127;

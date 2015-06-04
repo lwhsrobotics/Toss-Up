@@ -11,33 +11,32 @@ Semaphore liftSemaphore;
 
 PidState liftStateLeft;
 PidState liftStateRight;
-/*
-int LIFT_DT = 15;
 
-const int LIFT_MIN = 0;
-const int LIFT_MAX = 0;
+void liftWaitTarget();
 
-float Kp = 0.05;
-float Ki = 0.01;
-float Kd = 1;
+void liftTaskCreate();
 
-const int LIFT_INTEGRAL_THRESHOLD = 150;
-*/
-#define LIFT_ACQUIRE int __lift_had_semaphore = liftAcquireSemaphore();
-#define LIFT_RELEASE if(!__lift_had_semaphore) liftReleaseSemaphore();
+void liftTaskDelete();
 
 int liftAcquireSemaphore(int timeout);
 
 int liftReleaseSemaphore();
 
 void liftInit();
+void liftReset();
 
 void liftSetTarget(int target);
+
+void liftSetMax();
+void liftSetHalf();
+void liftSetMin();
 
 void liftManual(int y);
 
 void liftIncrementTarget(int amount);
 
 void lift();
+
+void hang();
 
 #endif /* LIFTCONTROL_H_ */

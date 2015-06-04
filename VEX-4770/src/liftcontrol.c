@@ -4,26 +4,31 @@
 
 #include "main.h"
 #include <math.h>
+#include "liftcontrol.h"
 #include "pid.h"
 #include "motors.h"
+#include "drivecontrol.h"
 
 Semaphore liftSemaphore;
 
-PidState liftStateLeft;
-PidState liftStateRight;
+PidState liftStateLeft, liftStateRight;
+int liftInitialTargetLeft, liftInitialTargetRight;
 
 int LIFT_DT = 15;
 
-const int LIFT_MIN = 0;
-const int LIFT_MAX = 33 / 12 * 627; // (teeth on rack) / (teeth per pinion) * (encoder ticks per revolution)
+const int LIFT_MIN = 800;//885;
+const int LIFT_MAX = 2350;//2175;
+const int LIFT_MID = 1600;
 
-float Kp = 0.05;
-float Ki = 0.01;
-float Kd = 1;
+float Kp = 0.2;
+float Ki = 0.1;
+float Kd = 3.0;
 
 const int LIFT_INTEGRAL_THRESHOLD = 150;
+const int LIFT_DOWN_FORCE = 20;
+const int LIFT_UP_FORCE = 30;
 
-#define LIFT_ACQUIRE int __lift_had_semaphore = liftAcquireSemaphore(36000);
+#define LIFT_ACQUIRE bool __lift_had_semaphore = liftAcquireSemaphore(1000);
 #define LIFT_RELEASE if(!__lift_had_semaphore) liftReleaseSemaphore();
 
 int liftAcquireSemaphore(int timeout) {
@@ -34,16 +39,33 @@ int liftReleaseSemaphore() {
 	return semaphoreGive(liftSemaphore);
 }
 
-void liftInit() {
-	int liftLeftCount = 0, liftRightCount = 0;
+TaskHandle liftTask = NULL;
 
-	imeGet(driveBackLeft, &liftLeftCount);
-	imeGet(driveBackRight, &liftRightCount);
+void liftTaskCreate() {
+	liftTaskDelete();
+	liftTask = taskCreate(lift, TASK_DEFAULT_STACK_SIZE, NULL, TASK_PRIORITY_DEFAULT);
+	if (liftSemaphore == NULL) liftSemaphore = semaphoreCreate();
+}
+
+void liftTaskDelete() {
+	if (liftTask != NULL) {
+		taskDelete(liftTask);
+		liftTask = NULL;
+	}
+}
+
+void liftInit() {
+	liftInitialTargetLeft = analogRead(potLiftLeft);
+	liftInitialTargetRight = analogRead(potLiftRight);
 
 	pidInitState(&liftStateLeft, Kp, Ki, Kd, 150);
 	pidInitState(&liftStateRight, Kp, Ki, Kd, 150);
-	pidSetTarget(&liftStateLeft, liftLeftCount);
-	pidSetTarget(&liftStateRight, liftRightCount);
+	liftReset();
+}
+
+void liftReset() {
+	pidSetTarget(&liftStateLeft, liftInitialTargetLeft);
+	pidSetTarget(&liftStateRight, liftInitialTargetRight);
 }
 
 void liftSetTarget(int target) {
@@ -56,7 +78,24 @@ void liftSetTarget(int target) {
 
 	LIFT_RELEASE
 }
+<<<<<<< HEAD
 //0   1724   17
+=======
+
+void liftSetMax() {
+	liftSetTarget(LIFT_MAX);
+}
+
+void liftSetHalf() {
+	liftSetTarget(LIFT_MID);
+}
+
+void liftSetMin() {
+	liftSetTarget(LIFT_MIN);
+}
+
+
+>>>>>>> origin/master
 void liftManual(int y) {
 	int oldLeft = liftStateLeft.target;
 	int oldRight = liftStateRight.target;
@@ -65,12 +104,14 @@ void liftManual(int y) {
 
 	if (offset < 0) {
 		int minValue = fmin(oldLeft, oldRight);
-		if (minValue + offset < LIFT_MIN)
+		if (minValue + offset < LIFT_MIN) {
 			offset = LIFT_MIN - minValue;
+		}
 	} else if (offset > 0) {
 		int maxValue = fmax(oldLeft, oldRight);
-		if (maxValue + offset > LIFT_MAX)
+		if (maxValue + offset > LIFT_MAX) {
 			offset = LIFT_MAX - maxValue;
+		}
 	}
 
 	pidIncrementTarget(&liftStateLeft, offset);
@@ -92,27 +133,59 @@ int liftMapOffset(int offset) {
 	return offset / 10;
 }
 
+bool liftAtTarget(int threshold) {
+	LIFT_ACQUIRE
+
+	int dLeft = abs(analogRead(potLiftLeft) - pidGetTarget(&liftStateLeft));
+	int dRight = abs(analogRead(potLiftRight) - pidGetTarget(&liftStateRight));
+	bool atTarget = dLeft < threshold && dRight < threshold;
+
+	LIFT_RELEASE
+
+	return atTarget;
+}
+
+void liftWaitTarget(int threshold) {
+	while (!liftAtTarget(threshold)) delay(10);
+}
+
 void lift() {
-	liftSemaphore = semaphoreCreate();
-
 	while (true) {
-		int liftLeftCount = 0, liftRightCount = 0;
+		//LIFT_ACQUIRE
 
-		imeGet(driveBackLeft, &liftLeftCount);
-		imeGet(driveBackRight, &liftRightCount);
+		int liftLeftCount = analogRead(potLiftLeft);
+		int liftRightCount = analogRead(potLiftRight);
+
+		//printf("Left Potentiometer: %d    Right Potentiometer: %d\r\n", liftLeftCount, liftRightCount);
 
 		int initialOffset = liftStateRight.target - liftStateLeft.target;
 		int realOffset = liftRightCount - liftLeftCount;
 		int offset = realOffset - initialOffset;
 		int offsetSpeed = liftMapOffset(offset);
 
-		int leftSpeed = pid(&liftStateLeft, liftLeftCount, LIFT_DT) - offsetSpeed;
-		int rightSpeed = pid(&liftStateRight, liftRightCount, LIFT_DT) + offsetSpeed;
+		int leftSpeed = pid(&liftStateLeft, liftLeftCount, LIFT_DT) + offsetSpeed;
+		int rightSpeed = pid(&liftStateRight, liftRightCount, LIFT_DT) - offsetSpeed;
 
-		motorSet(driveBackLeft, -leftSpeed);
-		motorSet(driveFrontLeft, leftSpeed);
-		motorSet(driveBackRight, rightSpeed);
-		motorSet(driveFrontRight, -rightSpeed);
+		// if the lift is at bottom apply a gentle downforce to keep it low
+		if (liftStateRight.target <= LIFT_MIN || liftStateLeft.target <= LIFT_MIN) {
+			leftSpeed = fmin(leftSpeed, -LIFT_DOWN_FORCE);
+			rightSpeed = fmin(rightSpeed, -LIFT_DOWN_FORCE);
+		}
+
+		// if lift is wherever apply something
+		if (liftStateRight.target >= LIFT_MAX || liftStateLeft.target >= LIFT_MAX) {
+			leftSpeed = fmax(leftSpeed, LIFT_UP_FORCE);
+			rightSpeed = fmax(rightSpeed, LIFT_UP_FORCE);
+		}
+
+		motorSet(liftLeft, leftSpeed);
+		motorSet(liftRight, -rightSpeed);
+
+		//printf("Left Speed: %d    Right Speed: %d\r\n", leftSpeed, rightSpeed);
+
+		//printf("Left Target: %d    Right Target: %d\r\n", liftStateLeft.target, liftStateRight.target);
+
+		//LIFT_RELEASE
 
 		delay(LIFT_DT);
 	}

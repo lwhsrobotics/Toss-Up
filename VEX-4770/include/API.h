@@ -573,7 +573,7 @@ typedef void * Gyro;
  * @return the signed and cumulative number of degrees rotated around the gyro's vertical axis
  * since the last start or reset
  */
-int gyroGet(Gyro gyro);
+int gyroGet(Gyro);
 /**
  * Initializes and enables a gyro on an analog port.
  *
@@ -602,7 +602,7 @@ Gyro gyroInit(unsigned char port, unsigned short multiplier);
  *
  * @param gyro the Gyro object from gyroInit() to reset
  */
-void gyroReset(Gyro gyro);
+void gyroReset(Gyro);
 /**
  * Stops and disables the gyro.
  *
@@ -611,7 +611,7 @@ void gyroReset(Gyro gyro);
  *
  * @param gyro the Gyro object from gyroInit() to stop
  */
-void gyroShutdown(Gyro gyro);
+void gyroShutdown(Gyro);
 
 /**
  * Reference type for an initialized encoder.
